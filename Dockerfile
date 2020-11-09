@@ -142,6 +142,13 @@ VOLUME ["/var/lib/mysql", "/var/lib/slurmd", "/var/spool/slurmd", "/var/log/slur
 
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
+# Fixups for Slurm CentOS -> Debian
+RUN \
+    ln -s /var/run /run && \
+    mkdir /var/run/munge && \
+    chown munge:munge /var/run/munge && \
+    mkdir /var/run/supervisor/
+
 # Add Tini
 ARG TINI_VERSION=v0.18.0
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /sbin/tini
