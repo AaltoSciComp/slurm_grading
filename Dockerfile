@@ -159,5 +159,5 @@ COPY bin /usr/local/bin
 
 # Base environment
 WORKDIR /submission
-# ENTRYPOINT ["/gw"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh", "/gw"]
 # CMD ["/exercise/run.sh"]
