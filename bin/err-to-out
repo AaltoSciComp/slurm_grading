@@ -1,0 +1,3 @@
+#!/bin/sh -e
+pre < /feedback/err >> /feedback/out
+> /feedback/err

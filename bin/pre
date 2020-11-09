@@ -1,0 +1,33 @@
+#!/bin/sh
+
+class=""
+while [ "$1" ]; do
+    case "$1" in
+        -c) class="$class${class:+ }$2" ; shift 2 ;;
+        --) shift ; break ;;
+        -*) echo "ERROR: Invalid option '$1' for $0" >&2 ; exit 64 ;;
+        *) break ;;
+    esac
+done
+
+[ "$class" ] && class=" class=\"$class\""
+
+wrap() {
+    sed -e "1 i <pre${class}>" -e '$a</pre>' \
+        -e 's/\&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g'
+}
+
+if [ $# -gt 0 ]; then
+    # this equals to `"$@" | wrap`, but exit code ($?) comes from "$@" instead of `wrap`
+    # fd 4 contains stdout from the piped command
+    # fd 3 contains the exit code from "$@"
+    # fd 2 is passed through as is
+    # fd 1 is passed via | character
+    #  - between "$@" and `wrap`
+    #  - between groups, i.e., from fd 3 to second group (read xs; exit)
+    #  - between this line and this script, i.e., from fd 4 to this script
+    { { { { "$@" 3>&- 4>&-; echo $? >&3; } | wrap >&4; } 3>&1; } | { read xs; exit $xs; }; } 4>&1
+    exit $?
+else
+    wrap
+fi
