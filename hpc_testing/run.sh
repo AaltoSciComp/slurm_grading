@@ -1,6 +1,6 @@
 #!/bin/bash
 
-capture pre /exercise/test_hpc_test.sh
+capture pre /exercise/test_hpc.sh
 points 1 $?
 
 :

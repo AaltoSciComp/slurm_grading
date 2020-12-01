@@ -10,8 +10,6 @@ files:
     name: hpc_test.sh
 
 container:
-  image: grading_copy
+  image: grading_base_slurm
   mount: exercises/hpc_test
   cmd: /exercise/run.sh
-
-# feedback_template: ./exercises/fibonacci/feedback_template.html

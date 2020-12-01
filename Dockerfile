@@ -1,46 +1,6 @@
-FROM debian:buster-20200908-slim
-
-ENV LANG=C.UTF-8 USER=root HOME=/root
+FROM apluslms/grading-base:latest
 
 ENV PATH="/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bin:/usr/local/sbin:/root/bin"
-
-# Tools for dockerfiles and image management
-COPY rootfs /
-
-# Base tools that are used by all images
-RUN apt_install \
-    runit \
-    gettext-base \
-    ca-certificates \
-    curl \
-    jo \
-    jq \
-    make \
-    time \
-    git \
-    openssh-client \
-    file \
- # Copy single binaries from packages and remove packages
- && cp /usr/bin/chpst \
-       /usr/bin/envsubst \
-       /usr/local/bin \
- && dpkg -P runit gettext-base \
- && apt-get -qqy autoremove \
- && dpkg -l|awk '/^rc/ {print $2}'|xargs -r dpkg -P \
- && (cd /usr/local/bin && ln -sf chpst setuidgid && ln -sf chpst softlimit && ln -sf chpst setlock) \
-\
- # Create basic folders
- && mkdir -p /feedback /submission /exercise \
- && chmod 0770 /feedback \
-\
- # Change HOME for nobody from /nonexistent to /tmp
- && usermod -d /tmp nobody \
- # Create two more nobody users
- && groupadd doer -g 65501 \
- && useradd doer -u 65501 -g 65501 -c "a nobody user" -s /usr/sbin/nologin -m -k - \
- && groupadd tester -g 65502 \
- && useradd tester -u 65502 -g 65502 -c "a nobody user" -s /usr/sbin/nologin -m -k - \
- && :
 
 # Install common YUM dependency packages
 RUN apt_install \
@@ -90,7 +50,6 @@ RUN set -ex \
 
 # Compile, build and install Slurm from Git source
 ARG SLURM_TAG=slurm-19-05-4-1
-#!/bin/bash
 RUN set -ex \
     && git clone https://github.com/SchedMD/slurm.git \
     && cd slurm \
@@ -154,10 +113,5 @@ ARG TINI_VERSION=v0.18.0
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /sbin/tini
 RUN chmod +x /sbin/tini
 
-# Base grading tools
-COPY bin /usr/local/bin
-
-# Base environment
-WORKDIR /submission
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh", "/gw"]
-# CMD ["/exercise/run.sh"]
+CMD bash
