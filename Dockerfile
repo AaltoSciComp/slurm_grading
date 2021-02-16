@@ -5,6 +5,7 @@ ENV PATH="/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bin:/usr/local/sbin:/root/bin
 # Install common YUM dependency packages
 RUN apt_install \
         autoconf \
+        automake \
         bash-completion \
         bzip2 \
         libbz2-dev \
@@ -14,6 +15,7 @@ RUN apt_install \
         libgdbm-dev \
         git \
         glibc-source \
+        lmod \
         libgmp-dev \
         libffi-dev \
         libgl-dev \
@@ -29,12 +31,14 @@ RUN apt_install \
         pkg-config \
         psmisc \
         libreadline-dev \
-        libsqlite3-dev \
+        tcl \
         tcl-dev \
         tix-dev \
         tk \
         tk-dev \
+        sed \
         supervisor \
+        procps \
         wget \
         vim \
         liblzma-dev \
@@ -113,5 +117,20 @@ ARG TINI_VERSION=v0.18.0
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /sbin/tini
 RUN chmod +x /sbin/tini
 
+# Add some modulefiles: hello and pi
+RUN \
+    mkdir -p /usr/local/modules/hello/bin/ && \
+    mkdir -p /usr/local/modules/pi/bin/ && \
+    cd /tmp && \
+    git clone https://github.com/AaltoSciComp/hpc-examples && \
+    mv hpc-examples/slurm/pi.py /usr/local/modules/pi/bin/pi && \
+    mv hpc-examples/slurm/pi_aggregation.py /usr/local/modules/pi/bin/pi_aggregation && \
+    mv hpc-examples/slurm/pi-mpi.py /usr/local/modules/pi/bin/pi-mpi && \
+    gcc hpc-examples/slurm/pi-openmp.c -o /usr/local/modules/pi/bin/pi-openmp && \
+    chmod a+x /usr/local/modules/pi/bin/* && \
+    rm -rf hpc-examples
+COPY files/hello-world /usr/local/modules/hello/bin/
+COPY files/modulefiles/ /usr/share/modulefiles/
+
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh", "/gw"]
-CMD bash
+CMD bash -c "source /etc/profile.d/lmod.sh && bash"
