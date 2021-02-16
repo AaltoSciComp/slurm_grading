@@ -131,6 +131,7 @@ RUN \
     rm -rf hpc-examples
 COPY files/hello-world /usr/local/modules/hello/bin/
 COPY files/modulefiles/ /usr/share/modulefiles/
+RUN echo "/usr/share/modulefiles/" >> /etc/lmod/modulespath 
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh", "/gw"]
 CMD bash -c "source /etc/profile.d/lmod.sh && bash"
