@@ -42,7 +42,8 @@ RUN apt_install \
         wget \
         vim \
         liblzma-dev \
-        zlib1g-dev
+        zlib1g-dev \
+        python3
 
 COPY files/install-python.sh /tmp
 
